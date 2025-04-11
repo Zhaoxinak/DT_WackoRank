@@ -11,9 +11,14 @@
 # SavedVariables: raidData, playerGuildData
 # SavedVariablesPerCharacter: ownGuild, startRaidTime, raidStartTimeString, uniqueID
 
+
+DT_WackoRank_Data.lua
+
 Tools.lua
 
 Locale-zhCN.lua
+
+DT_WackoRank_Main.lua
 
 AvatarMenu.lua
 DT_WackoRank.lua

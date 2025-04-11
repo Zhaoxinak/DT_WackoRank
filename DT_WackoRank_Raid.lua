@@ -2,12 +2,12 @@
 WRRaid = {}
 
 -- 获取本地化库实例
-local L = AceLibrary("AceLocale-2.2"):new("RaidBuff")
+local L = AceLibrary("AceLocale-2.2"):new("WackoRank")
 
 -- 初始化 WRRaid 模块 (由 RaidBuff:OnInitialize 调用)
 function WRRaid:OnInitialize()
     -- 创建 UI 框架 (如果尚未创建)
-    if not self.mf then self:SetUpRaidFrame() end -- 主分配界面
+    if not self.rf then self:SetUpRaidFrame() end -- 主分配界面
 
     -- 存储团队成员职业信息 { ["playerName"] = "CLASS", ... }
     self.raidMemberClasses = {}

@@ -28,6 +28,14 @@ function WackoRank:OnInitialize()
     -- 注册默认配置结构
     self:RegisterDefaults("profile", {})
 
+     -- 初始化主界面模块 (RBMain)
+     if WRMain and WRMain.OnInitialize then
+        WRMain:OnInitialize()
+    else
+        self:Print("错误：WRMain 模块未找到或未正确加载！")
+        return -- 阻止后续初始化
+    end
+
     -- 初始化选项菜单
     self:InitializeOptions()
     self.OnMenuRequest = self.options -- 用于 FuBar 等插件显示菜单
