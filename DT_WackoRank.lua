@@ -31,6 +31,7 @@ function WackoRank:OnInitialize()
      -- 初始化主界面模块 (RBMain)
      if WRMain and WRMain.OnInitialize then
         WRMain:OnInitialize()
+        WRMain:RegisterChatEvents()
     else
         self:Print("错误：WRMain 模块未找到或未正确加载！")
         return -- 阻止后续初始化

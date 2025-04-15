@@ -2,7 +2,7 @@ DT_WackoRank_Version = "20250411"
 
 DT_WackoRank_PersonList = {
 
-	["李四"] = {
+	["德兔"] = {
 		[0] = {
 			["commentName"] = "张三",
 			["updateTime"] = "2024-10-01 14:20",

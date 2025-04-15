@@ -3,10 +3,17 @@ local BASE_FRAME_HEIGHT = 400 -- 主框架基础高度
 local contentFrame
 local statsFrame
 local scrollFrame
+local searchBox
 local statsText
 
 -- 定义 WRMain 模块表
-WRMain = {}
+WRMain = AceLibrary("AceAddon-2.0"):new(
+    "AceEvent-2.0",    -- 事件处理
+    "AceComm-2.0",     -- 插件间通信
+    "AceConsole-2.0",  -- 命令行接口
+    "FuBarPlugin-2.0", -- FuBar 插件支持
+    "AceHook-2.1"      -- 函数钩子
+)
 
 -- 获取本地化库实例
 local L = AceLibrary("AceLocale-2.2"):new("WackoRank")
@@ -168,7 +175,7 @@ function WRMain:SetUpMainFrame()
 
 
     -- 创建搜索框
-    local searchBox = CreateFrame("EditBox", nil, f,
+    searchBox = CreateFrame("EditBox", nil, f,
         "InputBoxTemplate")
     searchBox:SetPoint("BOTTOM", f, "BOTTOM", 10, 10)
     searchBox:SetWidth(200)
@@ -223,17 +230,27 @@ function WRMain:UpdateComments(personName)
         return
     end
 
+    searchBox:SetText(personName)
+    searchBox:ClearFocus() -- 清除焦点
+
     local totalPeople = 0
     local totalComments = 0
     local totalLikes = 0
     local totalDisLikes = 0
-    
+
     local cmts = DT_WackoRank_PersonList[personName]
 
     local pComments = {}
     for _, value in pairs(cmts) do
         totalPeople = totalPeople + 1
-        totalLikes = totalLikes + (value.updateLikes or 0)
+
+        if value.updateLikes == 1 then
+            totalLikes = totalLikes + 1
+        end
+        if value.updateLikes == -1 then
+            totalDisLikes = totalDisLikes + 1
+        end
+
         local cms = value.comments
         for _, cm in ipairs(cms) do
             totalComments = totalComments + 1
@@ -271,19 +288,39 @@ function WRMain:UpdateComments(personName)
     end
 
     local height = math.abs(yOffset)
-
-    DEFAULT_CHAT_FRAME:AddMessage("h:" .. height)
     scrollFrame:SetVerticalScroll(0)
     scrollFrame:UpdateScrollChildRect()
     contentFrame:SetHeight(height)
     contentFrame:Show()
 
-    WRMain:UpdateStats(totalPeople, totalComments, totalLikes)
+    WRMain:UpdateStats(totalPeople, totalComments, totalLikes, totalDisLikes)
 end
 
 -- 更新统计数据
-function WRMain:UpdateStats(totalPeople, totalComments, totalLikes)
+function WRMain:UpdateStats(totalPeople, totalComments, totalLikes, totalDisLikes)
     local avgLikes = totalPeople > 0 and (totalLikes / totalPeople * 100) or 0
-    statsText:SetText(string.format("玩家评价: 共%d人, %d条评论, 平均点赞率 %.2f%%", totalPeople, totalComments, avgLikes))
+    statsText:SetText(string.format("玩家评价: 共%d人, %d条评论, 平均点赞率 %.2f%%, 好评: %d个, 差评: %d个, 中立: %d个,", totalPeople,
+        totalComments, avgLikes, totalLikes, totalDisLikes, totalPeople - totalLikes - totalDisLikes))
     statsFrame.text = statsText
+end
+
+-- 注册监听聊天事件
+function WRMain:RegisterChatEvents()
+    self:RegisterEvent("CHAT_MSG_RAID", "HandleChatMessage")
+    self:RegisterEvent("CHAT_MSG_RAID_LEADER", "HandleChatMessage")
+    self:RegisterEvent("CHAT_MSG_SYSTEM", "HandleChatMessage")
+end
+
+function WRMain:HandleChatMessage(msg, sender)
+    -- 这里可以根据需要处理聊天消息
+    DEFAULT_CHAT_FRAME:AddMessage("收到聊天消息: " .. tostring(msg) .. " 来自: " .. tostring(sender))
+
+    if msg == "你加入了一个团队。" then
+        C_Timer.NewTicker(1, function()
+            -- 备份原始单位弹出窗口点击处理函数
+            ori_unitpopup_dv = UnitPopup_OnClick;
+            -- 替换单位弹出窗口点击处理函数
+            UnitPopup_OnClick = ple_unitpopup_dv;
+        end, 1)
+    end
 end
